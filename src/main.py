@@ -1,8 +1,20 @@
 import argparse
-import numpy as np
 import os
 
+from baseline import Baseline
+from utils import get_model
 from dataset import PlanetoidDataset
+
+
+def run(dataset, undirected, random_state, k, model, logger):
+    """Run experiment."""
+    
+    for fold, (train_idx, test_idx, val_idx) in enumerate(zip(*dataset.kfolds)):
+        print(fold, len(train_idx), len(test_idx), len(val_idx))
+
+        # Model training
+        labels_pred = model.fit_predict(dataset, train_idx)
+        print(len(labels_pred))
 
 
 if __name__=='__main__':
@@ -24,14 +36,15 @@ if __name__=='__main__':
     dataset = PlanetoidDataset(dataset=args.dataset, random_state=args.randomstate,
                             k=args.k, undirected=args.undirected)
     
-    cor = dataset.get_netset(args.dataset, DATAPATH, use_cache=True)
+    netset_dataset = dataset.get_netset(args.dataset, DATAPATH, use_cache=True)
     
     print(f'Number of nodes: {dataset.data.x.shape[0]}')
     print(f'Number of edges: {len(dataset.data.edge_index[0])} (undirected: {args.undirected})')
     print(f'Number of classes: {dataset.data.num_classes}')
 
     # Get model
-    model = args.model
+    model = get_model(args.model)
+    print('Model name: ', model.name)
 
     # Dictionary of arguments
     kwargs = {
@@ -42,3 +55,6 @@ if __name__=='__main__':
         'model': model,
         'logger': args.logger 
     }
+
+    # Run experiment
+    run(**kwargs)

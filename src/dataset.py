@@ -75,7 +75,7 @@ class PlanetoidDataset:
         graph = Bunch()
         graph.adjacency = adjacency
         graph.biadjacency = biadjacency
-        graph.labels = labels
+        graph.labels_true = labels
 
         return graph
 
