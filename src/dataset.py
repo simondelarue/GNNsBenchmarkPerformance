@@ -62,7 +62,7 @@ class PlanetoidDataset:
         rows = np.asarray(self.data.edge_index[0])
         cols = np.asarray(self.data.edge_index[1])
         data = np.ones(len(rows))
-        n = len(set(rows).intersection(set(cols)))
+        n = len(set(rows).union(set(cols)))
         adjacency = sparse.coo_matrix((data, (rows, cols)), shape=(n, n)).tocsr()
 
         # Features
