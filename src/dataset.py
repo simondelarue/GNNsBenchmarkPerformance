@@ -3,7 +3,7 @@ import os
 import pickle
 from scipy import sparse
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 
 from sknetwork.data import load_netset, Bunch
 
@@ -16,11 +16,10 @@ from torch_geometric.utils.convert import from_scipy_sparse_matrix
 class PlanetoidDataset:
     """Citation networks: Cora, PubMed, Citeseer."""
 
-    def __init__(self, dataset: str, undirected: bool, random_state: int, k: int):
-        self.undirected = undirected
+    def __init__(self, dataset: str, undirected: bool, random_state: int, k: int, stratified: bool):
         self.random_state = random_state
-        self.data = self.get_data(dataset, self.undirected)        
-        self.kfolds = self.k_fold(self.data, k, random_state)
+        self.data = self.get_data(dataset, undirected)        
+        self.kfolds = self.k_fold(self.data, k, random_state, stratified)
         self.netset = None
 
     def get_netset(self, dataset: str, pathname: str, use_cache: bool = True):
@@ -114,7 +113,7 @@ class PlanetoidDataset:
         return data
         
 
-    def k_fold(self, data: Data, k: int, random_state: int) -> tuple:
+    def k_fold(self, data: Data, k: int, random_state: int, stratified: bool = True) -> tuple:
         """Split all data in Data into k folds. Each fold contains train/val/test splits, where val and test sizes equal 1/k.
         
         Parameters
@@ -125,12 +124,17 @@ class PlanetoidDataset:
             k in k-folds method.
         random_state: int
             Controls the reproducility.
+        stratified: bool
+            If True, use stratified kfold.
             
         Returns
         -------
             Tuple of train/val/test indices for each fold.
         """
-        skf = StratifiedKFold(k, shuffle=True, random_state=random_state)
+        if stratified:
+            skf = StratifiedKFold(k, shuffle=True, random_state=random_state)
+        else:
+            skf = KFold(k, shuffle=True, random_state=random_state)
 
         test_indices, train_indices = [], []
         for _, idx in skf.split(torch.zeros(len(data.x)), data.y):
