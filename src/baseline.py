@@ -33,7 +33,7 @@ class Baseline(BaseModel):
         -------
             Dictionary of training seeds. """
         # Training data: corresponds to seed nodes
-        training_seeds = {i: labels_true[i] for i in train_idx}
+        training_seeds = {i.item(): labels_true[i] for i in train_idx}
         return training_seeds
     
     def fit_predict(self, dataset, train_idx: np.ndarray) -> np.ndarray:
@@ -50,7 +50,7 @@ class Baseline(BaseModel):
         -------
             Array of predicted node labels.
         """
-        training_seeds = self.get_seeds(dataset.netset.labels_true, train_idx)
+        training_seeds = self.get_seeds(dataset.netset.labels_true, train_idx)       
 
         labels_pred = self.alg.fit_predict(dataset.netset.adjacency, training_seeds)
         
