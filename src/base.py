@@ -10,3 +10,7 @@ class BaseModel(ABC):
     @abstractmethod
     def fit_predict():
         pass
+
+    @abstractmethod
+    def accuracy():
+        pass

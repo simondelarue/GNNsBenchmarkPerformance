@@ -1,6 +1,7 @@
 import numpy as np
 
 from base import BaseModel
+from metric import compute_accuracy
 
 from sknetwork.classification import PageRankClassifier, Propagation, DiffusionClassifier, NNClassifier
 
@@ -50,6 +51,26 @@ class Baseline(BaseModel):
             Array of predicted node labels.
         """
         training_seeds = self.get_seeds(dataset.netset.labels_true, train_idx)
+
         labels_pred = self.alg.fit_predict(dataset.netset.adjacency, training_seeds)
         
         return labels_pred
+    
+    def accuracy(self, dataset, labels_pred: np.ndarray, split: np.ndarray, penalized: bool) -> float:
+        """Accuracy score.
+        
+        Parameters
+        ----------
+        dataset
+            Dataset object.
+        labels_pred: np.ndarray
+            Predicted labels.
+        split: np.ndarray
+            Split indexes.
+        penalized: bool
+            If true, labels not predicted (with value -1) are considered in the accuracy computation.
+            
+        Returns
+        -------
+            Accuracy score"""
+        return compute_accuracy(dataset.netset.labels_true[split], labels_pred[split], penalized)
