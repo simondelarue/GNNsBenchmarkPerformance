@@ -1,3 +1,6 @@
 #!/bin/sh
 
-python main.py --dataset=cora --undirected=false --penalized=true --randomstate=8 --k=3 --model=PageRank --logger=Cora_8_PageRank
+for i in {3..15}
+do
+    python main.py --dataset=cora --undirected=true --penalized=true --randomstate=8 --k=$i --stratified=true --model=PageRank
+done
