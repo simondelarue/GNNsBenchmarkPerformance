@@ -1,60 +1,97 @@
 import argparse
+from collections import defaultdict
 import os
 
-from baseline import Baseline
-from utils import get_model
+from utils import save_dict, check_exists
 from dataset import PlanetoidDataset
+from train import Trainer
 
 
-def run(dataset, undirected, random_state, k, model, logger):
+def run(dataset, undirected, penalized, random_state, k, stratified, model):
     """Run experiment."""
     
-    for fold, (train_idx, test_idx, val_idx) in enumerate(zip(*dataset.kfolds)):
-        print(fold, len(train_idx), len(test_idx), len(val_idx))
+    train_accuracies, test_accuracies = [], []
+    outs = defaultdict(list)
 
-        # Model training
-        labels_pred = model.fit_predict(dataset, train_idx)
-        print(len(labels_pred))
+    for fold, (train_idx, test_idx, val_idx) in enumerate(zip(*dataset.kfolds)):
+        # Model training + predictions
+        # In semi-supervised classification, model trains on the entire network (graph + features), but has access only to node labels in the training split. It is then evaluated on (val and) test split, in which labels are unknown.
+        trainer = Trainer(train_idx, val_idx, test_idx)
+        train_acc, test_acc = trainer(model, dataset, penalized)
+
+        #test_acc = Test(model, dataset, **kwargs)
+
+        # Save training and test scores for averages on n runs
+        outs['train acc'].append(train_acc)
+        outs['test acc'].append(test_acc)
+
+    return outs
 
 
 if __name__=='__main__':
     DATAPATH = os.path.join(os.path.dirname(os.getcwd()), 'data')
+    RUNPATH = os.path.join(os.path.dirname(os.getcwd()), 'runs')
 
     # Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, required=True)
-    parser.add_argument('--undirected', type=bool, required=True)
+    parser.add_argument('--undirected', type=str, required=True)
+    parser.add_argument('--penalized', type=str, required=True)
     parser.add_argument('--randomstate', type=int, required=True)
     parser.add_argument('--k', type=int, required=True)
+    parser.add_argument('--stratified', type=str, required=True)
     parser.add_argument('--model', type=str, required=True)
-    parser.add_argument('--logger', type=str, default=None)
+    #parser.add_argument('--logger', type=str, default=None)
     args = parser.parse_args()
 
-    #raise Exception('end')
+    # Output filename
+    filename = '_'.join([args.dataset,
+                         'undir' + args.undirected,
+                         'penalized' + args.penalized,
+                         'random' + str(args.randomstate),
+                         'k' + str(args.k),
+                         'strat' + args.stratified,
+                         args.model])
 
-    # Create dataset
-    dataset = PlanetoidDataset(dataset=args.dataset, random_state=args.randomstate,
-                            k=args.k, undirected=args.undirected)
+    # If run already exists, pass
+    check_exists(RUNPATH, filename)
     
+    undirected = args.undirected=='true'
+    penalized = args.penalized=='true'
+    stratified = args.stratified=='true'
+
+    # Create dataset for GNN based models
+    dataset = PlanetoidDataset(dataset=args.dataset,
+                               undirected=undirected,
+                               random_state=args.randomstate, k=args.k,
+                               stratified=stratified)
+    
+    # For baseline models
     netset_dataset = dataset.get_netset(args.dataset, DATAPATH, use_cache=True)
     
     print(f'Number of nodes: {dataset.data.x.shape[0]}')
     print(f'Number of edges: {len(dataset.data.edge_index[0])} (undirected: {args.undirected})')
     print(f'Number of classes: {dataset.data.num_classes}')
-
-    # Get model
-    model = get_model(args.model)
-    print('Model name: ', model.name)
+    print(f'kfolds: {args.k} (stratified: {stratified})')
 
     # Dictionary of arguments
     kwargs = {
         'dataset': dataset, 
-        'undirected': args.undirected,
+        'undirected': undirected,
+        'penalized': penalized,
         'random_state': args.randomstate,
         'k': args.k,
-        'model': model,
-        'logger': args.logger 
+        'stratified': stratified,
+        'model': args.model,
+        #'logger': args.logger 
     }
 
     # Run experiment
-    run(**kwargs)
+    outs = run(**kwargs)
+
+    # Save results
+    global_out = {}
+    global_out['meta'] = args
+    global_out['results'] = outs
+    save_dict(RUNPATH, filename, global_out)
+    
