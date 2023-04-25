@@ -10,12 +10,11 @@ from train import Trainer
 def run(dataset, undirected, penalized, random_state, k, stratified, model):
     """Run experiment."""
     
-    train_accuracies, test_accuracies = [], []
     outs = defaultdict(list)
 
     for fold, (train_idx, test_idx, val_idx) in enumerate(zip(*dataset.kfolds)):
         # Model training + predictions
-        # In semi-supervised classification, model trains on the entire network (graph + features), but has access only to node labels in the training split. It is then evaluated on (val and) test split, in which labels are unknown.
+        # In semi-supervised classification, model trains on the entire network (graph + features), but has access only to node labels in the training split. It is then evaluated on (val and) test split, in which labels are unknown.     
         trainer = Trainer(train_idx, val_idx, test_idx)
         train_acc, test_acc = trainer(model, dataset, penalized)
 
@@ -46,11 +45,11 @@ if __name__=='__main__':
 
     # Output filename
     filename = '_'.join([args.dataset,
-                         'undir' + args.undirected,
-                         'penalized' + args.penalized,
+                         'undir' + args.undirected.lower(),
+                         'penalized' + args.penalized.lower(),
                          'random' + str(args.randomstate),
                          'k' + str(args.k),
-                         'strat' + args.stratified,
+                         'strat' + args.stratified.lower(),
                          args.model])
 
     # If run already exists, pass
