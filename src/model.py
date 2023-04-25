@@ -2,7 +2,7 @@ from base import BaseModel
 import numpy as np
 
 import torch
-from torch_geometric.nn import GCNConv, SAGEConv
+from torch_geometric.nn import GCNConv, SAGEConv, GATConv, SGConv
 import torch.nn.functional as F
 
 from metric import compute_accuracy
@@ -36,6 +36,30 @@ class GraphSage(torch.nn.Module):
         return x
     
 
+class GAT(torch.nn.Module):
+    def __init__(self, dataset, hidden_channels: int = 8):
+        super().__init__()
+        self.conv1 = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=8)
+        self.conv2 = GATConv(hidden_channels * 8, dataset.num_classes)
+
+    def forward(self, x, edge_index):
+        x = self.conv1(x, edge_index)
+        x = F.elu(x)
+        x = F.dropout(x, p=0.6, training=self.training)
+        x = self.conv2(x, edge_index)
+        return x
+    
+
+class SGC(torch.nn.Module):
+    def __init__(self, dataset):
+        super().__init__()
+        self.conv1 = SGConv(dataset.num_features, dataset.num_classes, K=2, cached=True)
+
+    def forward(self, x, edge_index):
+        x = self.conv1(x, edge_index)
+        return F.log_softmax(x, dim=1)
+    
+
 class GNN(BaseModel):
     """GNN model class."""
     def __init__(self, name: str, dataset):
@@ -44,12 +68,22 @@ class GNN(BaseModel):
             self.alg = GCN(dataset.data)
             self.optimizer = torch.optim.Adam(self.alg.parameters(), lr=0.01, weight_decay=5e-4)
             self.criterion = torch.nn.CrossEntropyLoss()
-            self.n_epochs = 100
+            self.n_epochs = 200
         elif name == 'graphsage':
             self.alg = GraphSage(dataset.data)
             self.optimizer = torch.optim.Adam(self.alg.parameters(), lr=0.01, weight_decay=5e-4)
             self.criterion = torch.nn.CrossEntropyLoss()
             self.n_epochs = 10
+        elif name == 'gat':
+            self.alg = GAT(dataset.data)
+            self.optimizer = torch.optim.Adam(self.alg.parameters(), lr=0.05, weight_decay=5e-4)
+            self.criterion = torch.nn.CrossEntropyLoss()
+            self.n_epochs = 100
+        elif name == 'sgc':
+            self.alg = SGC(dataset.data)
+            self.optimizer = torch.optim.Adam(self.alg.parameters(), lr=0.2, weight_decay=0.005)
+            self.criterion = torch.nn.CrossEntropyLoss()
+            self.n_epochs = 100
 
 
     def update_masks(self, data, train_idx, val_idx, test_idx):
@@ -167,6 +201,6 @@ class GNN(BaseModel):
         -------
             Accuracy score"""
         if split_name == 'train':
-            return compute_accuracy(dataset.data.y[dataset.data.train_mask], labels_pred[dataset.data.train_mask], penalized)
+            return compute_accuracy(np.array(dataset.data.y[dataset.data.train_mask]), np.array(labels_pred[dataset.data.train_mask]), penalized)
         elif split_name == 'test':
             return self.test(dataset.data)

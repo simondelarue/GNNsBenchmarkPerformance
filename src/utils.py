@@ -11,7 +11,7 @@ def get_model(model: str, dataset = None) -> BaseModel:
     """Get model."""
     if model.lower() in ['pagerank', 'labelpropagation', 'diffusion', 'knn']:
         return Baseline(model.lower())
-    elif model.lower() in ['gcn', 'graphsage']:
+    elif model.lower() in ['gcn', 'graphsage', 'gat', 'sgc']:
         return GNN(model.lower(), dataset)
     else:
         raise ValueError(f'Unknown model: {model}.')
