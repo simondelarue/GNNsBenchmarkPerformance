@@ -54,11 +54,12 @@ if __name__=='__main__':
                          args.model])
 
     # If run already exists, pass
-    check_exists(RUNPATH, filename)
+    force_run = True
+    check_exists(RUNPATH, filename, force_run=force_run)
     
-    undirected = args.undirected=='true'
-    penalized = args.penalized=='true'
-    stratified = args.stratified=='true'
+    undirected = args.undirected.lower()=='true'
+    penalized = args.penalized.lower()=='true'
+    stratified = args.stratified.lower()=='true'
 
     # Create dataset for GNN based models
     dataset = PlanetoidDataset(dataset=args.dataset,
@@ -69,9 +70,8 @@ if __name__=='__main__':
     # For baseline models
     netset_dataset = dataset.get_netset(args.dataset, DATAPATH, use_cache=True)
     
-    print(f'Number of nodes: {dataset.data.x.shape[0]}')
-    print(f'Number of edges: {len(dataset.data.edge_index[0])} (undirected: {args.undirected})')
-    print(f'Number of classes: {dataset.data.num_classes}')
+    print(f'Algorithm: {args.model}')
+    print(f'Dataset: {args.dataset} (#nodes={dataset.data.x.shape[0]}, #edges={len(dataset.data.edge_index[0])}, undirected: {undirected})')
     print(f'kfolds: {args.k} (stratified: {stratified})')
 
     # Dictionary of arguments
