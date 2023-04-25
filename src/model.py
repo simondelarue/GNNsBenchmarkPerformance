@@ -75,8 +75,9 @@ class GNN(BaseModel):
         data.train_mask = train_mask
         test_mask = torch.zeros(len(data.x), dtype=bool)
         test_mask[test_idx] = True
-        
-        test_mask[val_idx] = True # ---> no val set
+
+        if val_idx is not None:
+            test_mask[val_idx] = True # ---> no val set
         data.test_mask = test_mask
 
         return data
