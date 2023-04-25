@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import numpy as np
 
 
 class BaseModel(ABC):
@@ -8,9 +9,9 @@ class BaseModel(ABC):
         self.name = name
 
     @abstractmethod
-    def fit_predict():
+    def fit_predict(self, dataset, train_idx: np.ndarray = None):
         pass
 
     @abstractmethod
-    def accuracy():
+    def accuracy(dataset, labels_pred, split, penalized, *args):
         pass
