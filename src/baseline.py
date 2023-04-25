@@ -36,7 +36,7 @@ class Baseline(BaseModel):
         training_seeds = {i.item(): labels_true[i] for i in train_idx}
         return training_seeds
     
-    def fit_predict(self, dataset, train_idx: np.ndarray) -> np.ndarray:
+    def fit_predict(self, dataset, train_idx: np.ndarray, val_idx: np.ndarray = None, test_idx : np.ndarray = None) -> np.ndarray:
         """Fit algorithm on training data and predict node labels.
         
         Parameters
@@ -56,7 +56,7 @@ class Baseline(BaseModel):
         
         return labels_pred
     
-    def accuracy(self, dataset, labels_pred: np.ndarray, split: np.ndarray, penalized: bool) -> float:
+    def accuracy(self, dataset, labels_pred: np.ndarray, split: np.ndarray, penalized: bool, *args) -> float:
         """Accuracy score.
         
         Parameters
