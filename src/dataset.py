@@ -105,13 +105,25 @@ class PlanetoidDataset:
                                 y=torch.tensor(labels_true),
                                 num_classes=len(np.unique(labels_true)))
             else:
-                data = Planetoid(root='/tmp/Cora', name='Cora')
+                data = self._to_custom_data(Planetoid(root='/tmp/Cora', name='Cora'))
         elif dataset == 'citeseer':
-            data = Planetoid(root='/tmp/Citeseer', name='Citeseer')
+            data = self._to_custom_data(Planetoid(root='/tmp/Citeseer', name='Citeseer'))
         elif dataset == 'pubmed':
-            data = Planetoid(root='/tmp/Pubmed', name='Pubmed')
+            data = self._to_custom_data(Planetoid(root='/tmp/Pubmed', name='Pubmed'))
+
         return data
+    
+    def _to_custom_data(self, dataset):
+        """Convert Dataset format from Pytorch to a modifiable Data object."""
+        data = Data(x=dataset.x,
+               edge_index=dataset.edge_index,
+               num_classes=dataset.num_classes,
+               y=dataset.y,
+               train_mask=dataset.train_mask,
+               val_mask=dataset.val_mask,
+               test_mask=dataset.test_mask)
         
+        return data
 
     def k_fold(self, data: Data, k: int, random_state: int, stratified: bool = True) -> tuple:
         """Split all data in Data into k folds. Each fold contains train/val/test splits, where val and test sizes equal 1/k.
