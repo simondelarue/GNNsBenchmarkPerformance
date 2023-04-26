@@ -9,7 +9,7 @@ from sknetwork.data import load_netset, Bunch
 
 import torch
 from torch_geometric.data import Data
-from torch_geometric.datasets import Planetoid
+from torch_geometric.datasets import Planetoid, Reddit
 from torch_geometric.utils.convert import from_scipy_sparse_matrix
 
 
@@ -18,7 +18,7 @@ class PlanetoidDataset:
 
     def __init__(self, dataset: str, undirected: bool, random_state: int, k: int, stratified: bool):
         self.random_state = random_state
-        self.data = self.get_data(dataset, undirected)        
+        self.data = self.get_data(dataset, undirected)
         self.kfolds = self.k_fold(self.data, k, random_state, stratified)
         self.netset = None
 
@@ -62,7 +62,7 @@ class PlanetoidDataset:
         rows = np.asarray(self.data.edge_index[0])
         cols = np.asarray(self.data.edge_index[1])
         data = np.ones(len(rows))
-        n = len(set(rows).union(set(cols)))
+        n = len(self.data.y) #len(set(rows).union(set(cols)))
         adjacency = sparse.coo_matrix((data, (rows, cols)), shape=(n, n)).tocsr()
 
         # Features
@@ -105,12 +105,13 @@ class PlanetoidDataset:
                                 y=torch.tensor(labels_true),
                                 num_classes=len(np.unique(labels_true)))
             else:
-                data = self._to_custom_data(Planetoid(root='/tmp/Cora', name='Cora'))
-        elif dataset == 'citeseer':
-            data = self._to_custom_data(Planetoid(root='/tmp/Citeseer', name='Citeseer'))
-        elif dataset == 'pubmed':
-            data = self._to_custom_data(Planetoid(root='/tmp/Pubmed', name='Pubmed'))
-
+                data = self._to_custom_data(Planetoid(root=f'/tmp/{dataset.capitalize()}',
+                                                      name=f'{dataset.capitalize()}'))
+        elif dataset in ['pubmed', 'citeseer']:
+            data = self._to_custom_data(Planetoid(root=f'/tmp/{dataset.capitalize()}',
+                                                      name=f'{dataset.capitalize()}'))
+        elif dataset in ['reddit']:
+            data = self._to_custom_data(Reddit(root=f'tmp/{dataset.capitalize()}'))
         return data
     
     def _to_custom_data(self, dataset):
