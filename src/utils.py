@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import pickle
 import sys
@@ -7,12 +8,12 @@ from baseline import Baseline
 from model import GNN
 
 
-def get_model(model: str, dataset = None) -> BaseModel:
+def get_model(model: str, dataset = None, train_idx : np.ndarray = None) -> BaseModel:
     """Get model."""
     if model.lower() in ['pagerank', 'labelpropagation', 'diffusion', 'knn']:
         return Baseline(model.lower())
     elif model.lower() in ['gcn', 'graphsage', 'gat', 'sgc']:
-        return GNN(model.lower(), dataset)
+        return GNN(model.lower(), dataset, train_idx)
     else:
         raise ValueError(f'Unknown model: {model}.')
     

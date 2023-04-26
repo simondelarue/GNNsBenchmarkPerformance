@@ -2,6 +2,7 @@ from base import BaseModel
 import numpy as np
 
 import torch
+from torch_geometric.loader import NeighborLoader
 from torch_geometric.nn import GCNConv, SAGEConv, GATConv, SGConv
 import torch.nn.functional as F
 
@@ -26,8 +27,8 @@ class GCN(torch.nn.Module):
 class GraphSage(torch.nn.Module):
     def __init__(self, dataset, hidden_channels: int = 256):
         super().__init__()
-        self.conv1 = SAGEConv(in_channels=dataset.num_features, out_channels=hidden_channels, aggr='max', project=False)
-        self.conv2 = SAGEConv(hidden_channels, dataset.num_classes, aggr='max', project=False)
+        self.conv1 = SAGEConv(in_channels=dataset.num_features, out_channels=hidden_channels, aggr='max')
+        self.conv2 = SAGEConv(hidden_channels, dataset.num_classes, aggr='max')
 
     def forward(self, x, edge_index):
         x = self.conv1(x, edge_index)
@@ -62,7 +63,7 @@ class SGC(torch.nn.Module):
 
 class GNN(BaseModel):
     """GNN model class."""
-    def __init__(self, name: str, dataset):
+    def __init__(self, name: str, dataset, train_idx: np.ndarray):
         super(GNN, self).__init__(name)
         if name == "gcn":
             self.alg = GCN(dataset.data)
@@ -74,6 +75,8 @@ class GNN(BaseModel):
             self.optimizer = torch.optim.Adam(self.alg.parameters(), lr=0.01, weight_decay=5e-4)
             self.criterion = torch.nn.CrossEntropyLoss()
             self.n_epochs = 10
+            self.train_loader = NeighborLoader(dataset.data, num_neighbors=[25, 10],
+                                               batch_size=512, input_nodes=train_idx)
         elif name == 'gat':
             self.alg = GAT(dataset.data)
             self.optimizer = torch.optim.Adam(self.alg.parameters(), lr=0.05, weight_decay=5e-4)
@@ -127,13 +130,23 @@ class GNN(BaseModel):
         -------
             Loss. 
         """
-        self.alg.train()
-        self.optimizer.zero_grad()
-        out = self.alg(dataset.x, dataset.edge_index)
-        loss = self.criterion(out[dataset.train_mask], dataset.y[dataset.train_mask])
-        loss.backward()
-        self.optimizer.step()
-        
+        if self.train_loader is not None:
+            total_loss = 0
+            for i, batch in enumerate(self.train_loader):
+                self.optimizer.zero_grad()
+                out = self.alg(batch.x, batch.edge_index)
+                loss = self.criterion(out[batch.train_mask], batch.y[batch.train_mask])
+                total_loss += loss
+                loss.backward()
+                self.optimizer.step()
+            loss = total_loss / len(self.train_loader)
+        else:
+            self.optimizer.zero_grad()
+            out = self.alg(dataset.x, dataset.edge_index)
+            loss = self.criterion(out[dataset.train_mask], dataset.y[dataset.train_mask])
+            loss.backward()
+            self.optimizer.step()
+
         return loss
 
     def test(self, data):
@@ -171,6 +184,7 @@ class GNN(BaseModel):
         dataset.data = self.update_masks(dataset.data, train_idx, val_idx, test_idx)
 
         # Train model
+        self.alg.train()
         for epoch in range(1, self.n_epochs + 1):
             loss = self.train(dataset.data)
             out = self.alg(dataset.data.x, dataset.data.edge_index)
