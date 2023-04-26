@@ -1,7 +1,8 @@
 import argparse
 from collections import defaultdict
+import numpy as np
 import os
-
+import torch
 from utils import save_dict, check_exists
 from dataset import PlanetoidDataset
 from train import Trainer
@@ -14,16 +15,19 @@ def run(dataset, undirected, penalized, random_state, k, stratified, model):
 
     for fold, (train_idx, test_idx, val_idx) in enumerate(zip(*dataset.kfolds)):
         # Model training + predictions
-        # In semi-supervised classification, model trains on the entire network (graph + features), but has access only to node labels in the training split. It is then evaluated on (val and) test split, in which labels are unknown.     
+        # In semi-supervised classification, model trains on the entire network (graph + features), but has access only to node labels in the training split. It is then evaluated on (val and) test split, in which labels are unknown.
         trainer = Trainer(train_idx, val_idx, test_idx)
-        train_acc, test_acc = trainer(model, dataset, penalized)
+        train_acc, test_acc, elapsed_time = trainer(model, dataset, penalized)
 
         #test_acc = Test(model, dataset, **kwargs)
 
         # Save training and test scores for averages on n runs
         outs['train acc'].append(train_acc)
         outs['test acc'].append(test_acc)
+        outs['elapsed_time'].append(elapsed_time)
 
+    print('Train acc: ', np.mean(outs['train acc']))
+    print('Test acc: ', np.mean(outs['test acc']))
     return outs
 
 
