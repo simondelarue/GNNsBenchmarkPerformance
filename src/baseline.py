@@ -40,7 +40,7 @@ class Baseline(BaseModel):
         training_seeds = {i.item(): labels_true[i] for i in train_idx}
         return training_seeds
     
-    def fit_predict(self, dataset, train_idx: np.ndarray, val_idx: np.ndarray = None, test_idx : np.ndarray = None) -> np.ndarray:
+    def fit_predict(self, dataset, train_idx: np.ndarray, val_idx: np.ndarray = None, test_idx : np.ndarray = None, **kwargs) -> np.ndarray:
         """Fit algorithm on training data and predict node labels.
         
         Parameters
@@ -56,7 +56,10 @@ class Baseline(BaseModel):
         """
         training_seeds = self.get_seeds(dataset.netset.labels_true, train_idx)       
 
-        labels_pred = self.alg.fit_predict(dataset.netset.adjacency, training_seeds)
+        if kwargs.get('use_features') == 'true':
+            labels_pred = self.alg.fit_predict(dataset.netset.biadjacency, training_seeds)
+        else:
+            labels_pred = self.alg.fit_predict(dataset.netset.adjacency, training_seeds)
         
         return labels_pred
     

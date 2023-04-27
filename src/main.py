@@ -48,6 +48,7 @@ if __name__=='__main__':
 
     # Optional
     parser.add_argument('--embedding_method', type=str, required=False)
+    parser.add_argument('--use_features', type=str, required=False)
     #parser.add_argument('--logger', type=str, default=None)
     args = parser.parse_args()
 
@@ -65,9 +66,9 @@ if __name__=='__main__':
     force_run = True
     check_exists(RUNPATH, filename, force_run=force_run)
     
-    undirected = args.undirected.lower()=='true'
-    penalized = args.penalized.lower()=='true'
-    stratified = args.stratified.lower()=='true'
+    undirected = args.undirected.lower() == 'true'
+    penalized = args.penalized.lower() == 'true'
+    stratified = args.stratified.lower() == 'true'
 
     # Create dataset for GNN based models
     dataset = PlanetoidDataset(dataset=args.dataset,
@@ -91,7 +92,8 @@ if __name__=='__main__':
         'k': args.k,
         'stratified': stratified,
         'model': args.model,
-        'embedding_method': args.embedding_method
+        'embedding_method': args.embedding_method,
+        'use_features': args.use_features
         #'logger': args.logger 
     }
     
