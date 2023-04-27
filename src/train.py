@@ -10,25 +10,22 @@ class Trainer:
         self.val_idx = None # not used
         self.test_idx = torch.sort(torch.cat((val_idx, test_idx))).values # concatenate val and test
 
-    def __call__(self, model: str, dataset, penalized):
-        return self.train_eval(model, dataset, penalized)
+    def __call__(self, model: str, dataset, penalized, **kwargs):
+        return self.train_eval(model, dataset, penalized, **kwargs)
 
-    def train_eval(self, model, dataset, penalized):
+    def train_eval(self, model, dataset, penalized, **kwargs):
         train_acc = 0
         test_acc = 0
         elapsed_time = 0
         for _ in range(3):
-            alg = get_model(model, dataset, self.train_idx)
+            alg = get_model(model, dataset, self.train_idx, **kwargs)
             start = time.time()
             labels_pred = alg.fit_predict(dataset, self.train_idx, self.val_idx, self.test_idx)
             end = time.time()
-            print(f'Elapsed: {end - start}s')
             train_acc += alg.accuracy(dataset, labels_pred, self.train_idx, penalized, 'train')
-            #print(f'Train acc: {train_acc}')
             test_acc += alg.accuracy(dataset, labels_pred, self.test_idx, penalized, 'test')
-            #print(f'Test acc: {test_acc}')
-            
             elapsed_time += end - start
+            print(f"Test acc: {alg.accuracy(dataset, labels_pred, self.test_idx, penalized, 'test')}")
 
         avg_train_acc = train_acc / 3
         avg_test_acc = test_acc / 3

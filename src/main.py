@@ -8,16 +8,15 @@ from dataset import PlanetoidDataset
 from train import Trainer
 
 
-def run(dataset, undirected, penalized, random_state, k, stratified, model):
+def run(dataset, undirected, penalized, random_state, k, stratified, model, **kwargs):
     """Run experiment."""
     
     outs = defaultdict(list)
-
     for fold, (train_idx, test_idx, val_idx) in enumerate(zip(*dataset.kfolds)):
         # Model training + predictions
         # In semi-supervised classification, model trains on the entire network (graph + features), but has access only to node labels in the training split. It is then evaluated on (val and) test split, in which labels are unknown.
         trainer = Trainer(train_idx, val_idx, test_idx)
-        train_acc, test_acc, elapsed_time = trainer(model, dataset, penalized)
+        train_acc, test_acc, elapsed_time = trainer(model, dataset, penalized, **kwargs)
 
         #test_acc = Test(model, dataset, **kwargs)
 
@@ -37,6 +36,8 @@ if __name__=='__main__':
 
     # Parse arguments
     parser = argparse.ArgumentParser()
+
+    # Required
     parser.add_argument('--dataset', type=str, required=True)
     parser.add_argument('--undirected', type=str, required=True)
     parser.add_argument('--penalized', type=str, required=True)
@@ -44,17 +45,21 @@ if __name__=='__main__':
     parser.add_argument('--k', type=int, required=True)
     parser.add_argument('--stratified', type=str, required=True)
     parser.add_argument('--model', type=str, required=True)
+
+    # Optional
+    parser.add_argument('--embedding_method', type=str, required=False)
     #parser.add_argument('--logger', type=str, default=None)
     args = parser.parse_args()
 
     # Output filename
-    filename = '_'.join([args.dataset,
-                         'undir' + args.undirected.lower(),
-                         'penalized' + args.penalized.lower(),
-                         'random' + str(args.randomstate),
-                         'k' + str(args.k),
-                         'strat' + args.stratified.lower(),
-                         args.model])
+    filename = []
+    for attr, value in vars(args).items():
+        if value is not None:
+            if attr not in ['dataset', 'model']:
+                filename.append(attr + str(value).lower())
+            else:
+                filename.append(str(value).lower())
+    filename = '_'.join(filename)
 
     # If run already exists, pass
     force_run = True
@@ -86,9 +91,10 @@ if __name__=='__main__':
         'k': args.k,
         'stratified': stratified,
         'model': args.model,
+        'embedding_method': args.embedding_method
         #'logger': args.logger 
     }
-
+    
     # Run experiment
     outs = run(**kwargs)
 

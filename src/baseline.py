@@ -4,11 +4,12 @@ from base import BaseModel
 from metric import compute_accuracy
 
 from sknetwork.classification import PageRankClassifier, Propagation, DiffusionClassifier, NNClassifier
+from sknetwork.embedding import Spectral
 
 
 class Baseline(BaseModel):
     """Baseline model class."""
-    def __init__(self, name: str):
+    def __init__(self, name: str, **kwargs):
         super(Baseline, self).__init__(name)
         if name == 'pagerank':
             self.alg = PageRankClassifier(solver='piteration')
@@ -17,7 +18,10 @@ class Baseline(BaseModel):
         elif name == 'diffusion':
             self.alg = DiffusionClassifier()
         elif name == 'knn':
-            self.alg = NNClassifier()
+            if kwargs.get('embedding_method') == 'true':
+                self.alg = NNClassifier(embedding_method=Spectral(5))
+            else:
+                self.alg = NNClassifier()
 
     def get_seeds(self, labels_true: np.ndarray, train_idx: np.ndarray) -> dict:
         """Get training seeds in the form of a dictionary.
