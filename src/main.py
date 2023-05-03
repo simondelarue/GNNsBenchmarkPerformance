@@ -2,9 +2,7 @@ import argparse
 from collections import defaultdict
 import numpy as np
 import os
-import torch
-from utils import save_dict, check_exists
-from dataset import PlanetoidDataset
+from utils import save_dict, check_exists, get_dataset
 from train import Trainer
 
 
@@ -71,10 +69,11 @@ if __name__=='__main__':
     stratified = args.stratified.lower() == 'true'
 
     # Create dataset for GNN based models
-    dataset = PlanetoidDataset(dataset=args.dataset,
-                               undirected=undirected,
-                               random_state=args.randomstate, k=args.k,
-                               stratified=stratified)
+    dataset = get_dataset(args.dataset,
+                          undirected,
+                          args.randomstate,
+                          args.k,
+                          stratified)
     
     # For baseline models
     netset_dataset = dataset.get_netset(args.dataset, DATAPATH, use_cache=True)
