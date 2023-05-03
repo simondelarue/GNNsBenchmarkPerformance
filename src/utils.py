@@ -3,10 +3,20 @@ import os
 import pickle
 import sys
 
-from base import BaseModel
+from base import BaseModel, BaseDataset
 from baseline import Baseline
+from dataset import PlanetoidDataset, WikivitalsDataset
 from model import GNN
 
+
+def get_dataset(dataset: str, undirected: bool, random_state: int, k: int, stratified: bool) -> BaseDataset:
+    """Get Dataset."""
+    if dataset.lower() in ['cora', 'pubmed', 'citeseer']:
+        return PlanetoidDataset(dataset, undirected, random_state, k, stratified)
+    elif dataset.lower() in ['wikivitals', 'wikivitals-fr', 'wikischools']:
+        return WikivitalsDataset(dataset, undirected, random_state, k, stratified)
+    else:
+        raise ValueError(f'Unknown dataset: {dataset}.')
 
 def get_model(model: str, dataset = None, train_idx : np.ndarray = None, **kwargs) -> BaseModel:
     """Get model."""
