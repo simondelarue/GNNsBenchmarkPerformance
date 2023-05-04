@@ -168,7 +168,7 @@ class GNN(BaseModel):
         
         return test_acc
     
-    def fit_predict(self, dataset, train_idx: np.ndarray, val_idx: np.ndarray, test_idx : np.ndarray) -> np.ndarray:
+    def fit_predict(self, dataset, train_idx: np.ndarray, val_idx: np.ndarray, test_idx : np.ndarray, **kwargs) -> np.ndarray:
         """Fit algorithm on training data and predict node labels.
         
         Parameters
@@ -187,11 +187,12 @@ class GNN(BaseModel):
         self.alg.train()
         for epoch in range(1, self.n_epochs + 1):
             loss = self.train(dataset.data)
-            out = self.alg(dataset.data.x, dataset.data.edge_index)
-            pred = out.argmax(dim=1)
+            
             #train_correct = pred[dataset.train_mask] == dataset.y[dataset.train_mask]
             #train_acc = int(train_correct.sum()) / int(dataset.train_mask.sum())
         #test_acc = self.test(self.alg, dataset)
+        out = self.alg(dataset.data.x, dataset.data.edge_index)
+        pred = out.argmax(dim=1)
 
         return pred
     
