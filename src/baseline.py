@@ -19,7 +19,7 @@ class Baseline(BaseModel):
             self.alg = DiffusionClassifier()
         elif name == 'knn':
             if kwargs.get('embedding_method') == 'true':
-                self.alg = NNClassifier(embedding_method=Spectral(5))
+                self.alg = NNClassifier(n_neighbors=5, embedding_method=Spectral(30))
             else:
                 self.alg = NNClassifier()
 
