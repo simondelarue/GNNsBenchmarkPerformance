@@ -16,8 +16,6 @@ def run(dataset, undirected, penalized, random_state, k, stratified, model, **kw
         trainer = Trainer(train_idx, val_idx, test_idx)
         train_acc, test_acc, elapsed_time = trainer(model, dataset, penalized, **kwargs)
 
-        #test_acc = Test(model, dataset, **kwargs)
-
         # Save training and test scores for averages on n runs
         outs['train acc'].append(train_acc)
         outs['test acc'].append(test_acc)
