@@ -27,6 +27,8 @@ def run(dataset, undirected, penalized, random_state, k, stratified, model, **kw
 
 
 if __name__=='__main__':
+    FORCE_RUN = True # If True, run experiment even if results already exists
+    USE_CACHE = True # If True, use cached result if existing 
     DATAPATH = os.path.join(os.path.dirname(os.getcwd()), 'data')
     RUNPATH = os.path.join(os.path.dirname(os.getcwd()), 'runs')
 
@@ -59,8 +61,7 @@ if __name__=='__main__':
     filename = '_'.join(filename)
 
     # If run already exists, pass
-    force_run = True
-    check_exists(RUNPATH, filename, force_run=force_run)
+    check_exists(RUNPATH, filename, force_run=FORCE_RUN)
     
     undirected = args.undirected.lower() == 'true'
     penalized = args.penalized.lower() == 'true'
@@ -74,7 +75,7 @@ if __name__=='__main__':
                           stratified)
     
     # For baseline models
-    netset_dataset = dataset.get_netset(args.dataset, DATAPATH, use_cache=True)
+    netset_dataset = dataset.get_netset(args.dataset, DATAPATH, use_cache=USE_CACHE)
     
     print(f'Algorithm: {args.model}')
     print(f'Dataset: {args.dataset} (#nodes={dataset.data.x.shape[0]}, #edges={len(dataset.data.edge_index[0])}, undirected: {undirected})')
