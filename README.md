@@ -12,6 +12,7 @@ We compare famous Graph Neural Network based models with simple baselines. The m
 We compare model performances on commonly used `Planetoid` datasets, *i.e.* `Cora`, `Pubmed` and `Citeseer`. But most importantly, we report performance comparisons on larger Wikipedia-based real-world datasets, *i.e.* `Wikivitals`, `Wikivitals-fr` and `Wikischools` (available [here](https://netset.telecom-paris.fr/)).
 
 Dataset statistics for undirected versions of the graphs:
+
 | Name | #nodes | #edges adjacency | dA | #features | #edges biadjacency | dB | #classes | 
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | `Cora` | 2,708 | 10,556 | 2.880e-03 | 1,433 | 49,216 | 1.268e-02 | 7 |
