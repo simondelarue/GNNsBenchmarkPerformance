@@ -17,6 +17,7 @@ Dataset statistics for undirected versions of the graphs:
 |:-----|--------|------------------|----|-----------|--------------------|----|----------|
 | ```Cora``` | 2,708 | 2,708 | 2,708 | 2,708 | 2,708 | 2,708 | 2,708 |
 
+new 
 
 | Name | #nodes | #edges adjacency | dA | #features | #edges biadjacency | dB | #classes |  
 |:-----|--------|------------------|----|-----------|--------------------|----|----------|  
