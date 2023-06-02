@@ -17,3 +17,10 @@ Dataset statistics for undirected versions of the graphs:
 |:-----|--------|------------------|----|-----------|--------------------|----|----------|  
 | `Cora` | 2,708 | 10,556 | 2.880e-03 | 1,433 | 49,216 | 1.268e-02 | 7 |  
 
+| Dataset      |
+|--------------|
+| [```SF2H```](http://www.sociopatterns.org/datasets/sfhh-conference-data-set/) |
+| [```HighSchool```](http://www.sociopatterns.org/datasets/high-school-contact-and-friendship-networks/) |  
+| [```ia-contact```](https://networkrepository.com/ia-contact.php) | 
+| [```ia-contacts-hypertext2009```](http://www.sociopatterns.org/datasets/hypertext-2009-dynamic-contact-network/) |
+| [```ia-enron-employees```](https://networkrepository.com/ia_enron_employees.php) |
