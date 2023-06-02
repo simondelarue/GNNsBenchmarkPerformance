@@ -13,12 +13,14 @@ We compare model performances on commonly used `Planetoid` datasets, *i.e.* `Cor
 
 Dataset statistics for undirected versions of the graphs:
 
+| Name | #nodes |
+|:-----|--------|
+| ```Cora``` | 2,708 |
+
+
 | Name | #nodes | #edges adjacency | dA | #features | #edges biadjacency | dB | #classes |  
 |:-----|--------|------------------|----|-----------|--------------------|----|----------|  
 | ```Cora``` | 2,708 | 10,556 | 2.880e-03 | 1,433 | 49,216 | 1.268e-02 | 7 |  
-
-
-
 | `CiteSeer` | 3,327 | 9,104 | 1.645e-03 | 3,703 | 105,165 | 8.536e-03 | 6 |  
 | `PubMed` | 19,717 | 88,648 | 4.561e-04 | 500 | 988,031 | 1.002e-01 | 3 |  
 | `Wikivitals` | 10,011 | 824,999 | 1.647e-02 | 37,845 | 1,363,301 | 3.598e-03 | 11 |  
