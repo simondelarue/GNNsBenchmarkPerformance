@@ -13,9 +13,9 @@ We compare model performances on commonly used `Planetoid` datasets, *i.e.* `Cor
 
 Dataset statistics for undirected versions of the graphs:
 
-| Name | #nodes |
-|:-----|--------|
-| ```Cora``` | 2,708 |
+| Name | #nodes | #edges adjacency | dA | #features | #edges biadjacency | dB | #classes |
+|:-----|--------|------------------|----|-----------|--------------------|----|----------|
+| ```Cora``` | 2,708 | 2,708 | 2,708 | 2,708 | 2,708 | 2,708 | 2,708 |
 
 
 | Name | #nodes | #edges adjacency | dA | #features | #edges biadjacency | dB | #classes |  
