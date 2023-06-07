@@ -21,7 +21,7 @@ def get_dataset(dataset: str, undirected: bool, random_state: int, k: int, strat
 
 def get_model(model: str, dataset = None, train_idx : np.ndarray = None, **kwargs) -> BaseModel:
     """Get model."""
-    if model.lower() in ['pagerank', 'labelpropagation', 'diffusion', 'knn']:
+    if model.lower() in ['pagerank', 'labelpropagation', 'diffusion', 'knn', 'logistic_regression']:
         return Baseline(model.lower(), **kwargs)
     elif model.lower() in ['gcn', 'graphsage', 'gat', 'sgc']:
         return GNN(model.lower(), dataset, train_idx)

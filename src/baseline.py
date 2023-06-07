@@ -3,6 +3,8 @@ import numpy as np
 from base import BaseModel
 from metric import compute_accuracy
 
+from sklearn.linear_model import LogisticRegression
+
 from sknetwork.classification import PageRankClassifier, Propagation, DiffusionClassifier, NNClassifier
 from sknetwork.embedding import Spectral
 
@@ -22,6 +24,8 @@ class Baseline(BaseModel):
                 self.alg = NNClassifier(n_neighbors=5, embedding_method=Spectral(30))
             else:
                 self.alg = NNClassifier()
+        elif name == 'logistic_regression':
+            self.alg = LogisticRegression()
 
     def get_seeds(self, labels_true: np.ndarray, train_idx: np.ndarray) -> dict:
         """Get training seeds in the form of a dictionary.
@@ -54,12 +58,19 @@ class Baseline(BaseModel):
         -------
             Array of predicted node labels.
         """
-        training_seeds = self.get_seeds(dataset.netset.labels_true, train_idx)       
-
-        if kwargs.get('use_features') == 'true':
-            labels_pred = self.alg.fit_predict(dataset.netset.biadjacency, training_seeds)
+        # Logistic regression from Sklearn does not have a fit_predict method
+        if self.name == 'logistic_regression':
+            if kwargs.get('use_features') == 'true':
+                labels_pred = self.alg.fit(dataset.netset.biadjacency[train_idx, :], dataset.netset.labels_true[train_idx]).predict(dataset.netset.biadjacency)
+            else:
+                labels_pred = self.alg.fit(dataset.netset.adjacency[train_idx, :], dataset.netset.labels_true[train_idx]).predict(dataset.netset.adjacency)
         else:
-            labels_pred = self.alg.fit_predict(dataset.netset.adjacency, training_seeds)
+            training_seeds = self.get_seeds(dataset.netset.labels_true, train_idx) 
+
+            if kwargs.get('use_features') == 'true':
+                labels_pred = self.alg.fit_predict(dataset.netset.biadjacency, training_seeds)
+            else:
+                labels_pred = self.alg.fit_predict(dataset.netset.adjacency, training_seeds)
         
         return labels_pred
     
