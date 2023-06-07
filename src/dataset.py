@@ -84,7 +84,7 @@ class WikivitalsDataset(BaseDataset):
                         y=torch.tensor(labels_true),
                         num_classes=len(np.unique(labels_true)))
         else:
-            raise Exception('Wikivitals dataset should be used with argument --undirected=true.')
+            raise Exception('Wikivitals dataset should be used with argument --undirected=false.')
         
         return data
     
