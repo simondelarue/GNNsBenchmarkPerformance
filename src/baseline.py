@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import sparse
 
 from base import BaseModel
 from metric import compute_accuracy
@@ -44,6 +45,32 @@ class Baseline(BaseModel):
         training_seeds = {i.item(): labels_true[i] for i in train_idx}
         return training_seeds
     
+    def transform_data(self, dataset, **kwargs):
+        """Apply transformation on data according to parameters.
+        
+        Parameters
+        ----------
+        dataset
+            Dataset object.
+        
+        Returns
+        -------
+        Transformed data as a sparse matrix.
+        """
+        # Use only features matrix
+        if kwargs.get('use_features') == 'true':
+            X = dataset.netset.biadjacency
+
+        # Use concatenation of adjacency and features matrix 
+        elif kwargs.get('use_concat') == 'true':
+            X = sparse.hstack((dataset.netset.adjacency, dataset.netset.biadjacency))
+
+        # Use only graph structure, i.e. adjacency matrix
+        else:
+            X = dataset.netset.adjacency
+
+        return X
+    
     def fit_predict(self, dataset, train_idx: np.ndarray, val_idx: np.ndarray = None, test_idx : np.ndarray = None, **kwargs) -> np.ndarray:
         """Fit algorithm on training data and predict node labels.
         
@@ -58,19 +85,16 @@ class Baseline(BaseModel):
         -------
             Array of predicted node labels.
         """
+        # Transform data
+        X = self.transform_data(dataset, **kwargs)
+
         # Logistic regression from Sklearn does not have a fit_predict method
         if self.name == 'logistic_regression':
-            if kwargs.get('use_features') == 'true':
-                labels_pred = self.alg.fit(dataset.netset.biadjacency[train_idx, :], dataset.netset.labels_true[train_idx]).predict(dataset.netset.biadjacency)
-            else:
-                labels_pred = self.alg.fit(dataset.netset.adjacency[train_idx, :], dataset.netset.labels_true[train_idx]).predict(dataset.netset.adjacency)
+            labels_pred = self.alg.fit(X[train_idx, :],
+                                       dataset.netset.labels_true[train_idx]).predict(X)
         else:
             training_seeds = self.get_seeds(dataset.netset.labels_true, train_idx) 
-
-            if kwargs.get('use_features') == 'true':
-                labels_pred = self.alg.fit_predict(dataset.netset.biadjacency, training_seeds)
-            else:
-                labels_pred = self.alg.fit_predict(dataset.netset.adjacency, training_seeds)
+            labels_pred = self.alg.fit_predict(X, training_seeds)
         
         return labels_pred
     

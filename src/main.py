@@ -11,6 +11,7 @@ def run(dataset, undirected, penalized, random_state, k, stratified, model, **kw
     
     outs = defaultdict(list)
     for fold, (train_idx, test_idx, val_idx) in enumerate(zip(*dataset.kfolds)):
+        #print(f'Fold : {fold}')
         # Model training + predictions
         # In semi-supervised classification, model trains on the entire network (graph + features), but has access only to node labels in the training split. It is then evaluated on (val and) test split, in which labels are unknown.
         trainer = Trainer(train_idx, val_idx, test_idx)
@@ -28,7 +29,7 @@ def run(dataset, undirected, penalized, random_state, k, stratified, model, **kw
 
 if __name__=='__main__':
     FORCE_RUN = True # If True, run experiment even if results already exists
-    USE_CACHE = True # If True, use cached result if existing 
+    USE_CACHE = False # If True, use cached dataset if existing 
     DATAPATH = os.path.join(os.path.dirname(os.getcwd()), 'data')
     RUNPATH = os.path.join(os.path.dirname(os.getcwd()), 'runs')
 
@@ -47,6 +48,7 @@ if __name__=='__main__':
     # Optional
     parser.add_argument('--embedding_method', type=str, required=False)
     parser.add_argument('--use_features', type=str, required=False)
+    parser.add_argument('--use_concat', type=str, required=False)
     #parser.add_argument('--logger', type=str, default=None)
     args = parser.parse_args()
 
@@ -91,7 +93,8 @@ if __name__=='__main__':
         'stratified': stratified,
         'model': args.model,
         'embedding_method': args.embedding_method,
-        'use_features': args.use_features
+        'use_features': args.use_features,
+        'use_concat': args.use_concat
         #'logger': args.logger 
     }
     
