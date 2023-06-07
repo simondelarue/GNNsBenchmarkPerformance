@@ -130,6 +130,7 @@ class GNN(BaseModel):
         -------
             Loss. 
         """
+        self.alg.train()
         if self.train_loader is not None:
             total_loss = 0
             for i, batch in enumerate(self.train_loader):
@@ -184,7 +185,6 @@ class GNN(BaseModel):
         dataset.data = self.update_masks(dataset.data, train_idx, val_idx, test_idx)
 
         # Train model
-        self.alg.train()
         for epoch in range(1, self.n_epochs + 1):
             loss = self.train(dataset.data)
             
