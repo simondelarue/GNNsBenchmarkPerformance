@@ -7,6 +7,7 @@ from base import BaseModel, BaseDataset
 from baseline import Baseline
 from dataset import PlanetoidDataset, WikivitalsDataset
 from model import GNN
+from model_skn import GNNSkn
 
 
 def get_dataset(dataset: str, undirected: bool, random_state: int, k: int, stratified: bool) -> BaseDataset:
@@ -24,6 +25,8 @@ def get_model(model: str, dataset = None, train_idx : np.ndarray = None, **kwarg
         return Baseline(model.lower(), **kwargs)
     elif model.lower() in ['gcn', 'graphsage', 'gat', 'sgc']:
         return GNN(model.lower(), dataset, train_idx)
+    elif model.lower() in ['gcn_skn']:
+        return GNNSkn(model.lower(), dataset, train_idx)
     else:
         raise ValueError(f'Unknown model: {model}.')
     
