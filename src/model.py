@@ -1,5 +1,6 @@
 from base import BaseModel
 import numpy as np
+from scipy import sparse
 
 import torch
 from torch_geometric.loader import NeighborLoader
@@ -63,8 +64,13 @@ class SGC(torch.nn.Module):
 
 class GNN(BaseModel):
     """GNN model class."""
-    def __init__(self, name: str, dataset, train_idx: np.ndarray):
+    def __init__(self, name: str, dataset, train_idx: np.ndarray, **kwargs):
         super(GNN, self).__init__(name)
+
+        # Transform features if needed
+        dataset = self.transform_data(dataset, **kwargs)
+
+        # Initialize model
         if name == "gcn":
             self.alg = GCN(dataset.data)
             self.optimizer = torch.optim.Adam(self.alg.parameters(), lr=0.01, weight_decay=5e-4)
@@ -168,6 +174,26 @@ class GNN(BaseModel):
         test_acc = int(test_correct.sum()) / int(data.test_mask.sum())
         
         return test_acc
+    
+    def transform_data(self, dataset, **kwargs):
+        """Apply transformation on data according to parameters.
+        
+        Parameters
+        ----------
+        dataset
+            Dataset object.
+        
+        Returns
+        -------
+        Transformed data.
+        """
+        # Use concatenation of adjacency and features matrix 
+        if kwargs.get('use_concat') == 'true':
+            X = torch.tensor(sparse.hstack((dataset.netset.adjacency, dataset.netset.biadjacency)).todense(), dtype=torch.float32)
+            dataset.data.x = X
+            dataset.num_features = dataset.data.x.shape[1]
+
+        return dataset
     
     def fit_predict(self, dataset, train_idx: np.ndarray, val_idx: np.ndarray, test_idx : np.ndarray, **kwargs) -> np.ndarray:
         """Fit algorithm on training data and predict node labels.

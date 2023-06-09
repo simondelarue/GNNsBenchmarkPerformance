@@ -47,6 +47,8 @@ class Trainer:
             # Accuracy
             train_acc += alg.accuracy(dataset, labels_pred, self.train_idx, penalized, 'train')
             test_acc += alg.accuracy(dataset, labels_pred, self.test_idx, penalized, 'test')
+            #print(f"Fold train acc: {alg.accuracy(dataset, labels_pred, self.train_idx, penalized, 'train')}")
+            #print(f"Fold test acc: {alg.accuracy(dataset, labels_pred, self.test_idx, penalized, 'test')}")
             elapsed_time += end - start
             #print(f"Test acc: {alg.accuracy(dataset, labels_pred, self.test_idx, penalized, 'test')}")
 

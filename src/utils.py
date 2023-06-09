@@ -24,7 +24,7 @@ def get_model(model: str, dataset = None, train_idx : np.ndarray = None, **kwarg
     if model.lower() in ['pagerank', 'labelpropagation', 'diffusion', 'knn', 'logistic_regression']:
         return Baseline(model.lower(), **kwargs)
     elif model.lower() in ['gcn', 'graphsage', 'gat', 'sgc']:
-        return GNN(model.lower(), dataset, train_idx)
+        return GNN(model.lower(), dataset, train_idx, **kwargs)
     elif model.lower() in ['gcn_skn']:
         return GNNSkn(model.lower(), dataset, train_idx)
     else:
